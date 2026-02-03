@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 
-// Hibiscus flower SVG component
 function HibiscusFlower({ size = 40, color = '#DC143C', opacity = 0.3 }) {
   return (
     <svg
@@ -10,7 +9,6 @@ function HibiscusFlower({ size = 40, color = '#DC143C', opacity = 0.3 }) {
       style={{ opacity }}
       className="transition-all duration-300"
     >
-      {/* Petals */}
       {[0, 72, 144, 216, 288].map((rotation, i) => (
         <ellipse
           key={i}
@@ -22,10 +20,8 @@ function HibiscusFlower({ size = 40, color = '#DC143C', opacity = 0.3 }) {
           transform={`rotate(${rotation} 50 50)`}
         />
       ))}
-      {/* Center */}
       <circle cx="50" cy="50" r="12" fill="#FFD700" />
       <circle cx="50" cy="50" r="6" fill="#FF6B6B" />
-      {/* Stamen */}
       {[0, 45, 90, 135, 180, 225, 270, 315].map((rotation, i) => (
         <line
           key={`stamen-${i}`}
@@ -42,7 +38,6 @@ function HibiscusFlower({ size = 40, color = '#DC143C', opacity = 0.3 }) {
   )
 }
 
-// Heart shape
 function FloatingHeart({ size = 30, color = '#FF69B4', opacity = 0.4 }) {
   return (
     <svg
@@ -57,7 +52,6 @@ function FloatingHeart({ size = 30, color = '#FF69B4', opacity = 0.4 }) {
   )
 }
 
-// Sparkle/Star
 function Sparkle({ size = 20, color = '#FFD700', opacity = 0.5 }) {
   return (
     <svg
@@ -76,7 +70,6 @@ export default function FloatingDecorations() {
   const [decorations, setDecorations] = useState([])
 
   useEffect(() => {
-    // Generate random decorations
     const types = ['hibiscus', 'heart', 'sparkle']
     const colors = {
       hibiscus: ['#DC143C', '#FF69B4', '#FF6B6B'],
@@ -141,7 +134,6 @@ export default function FloatingDecorations() {
         </div>
       ))}
 
-      {/* Gradient orbs */}
       <div
         className="absolute w-96 h-96 rounded-full opacity-20 blur-3xl"
         style={{

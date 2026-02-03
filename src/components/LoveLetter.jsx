@@ -2,19 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Heart, Download, RefreshCw, Sparkles, Music, Music2 } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-
-// ============================================
-// MÚSICA DE FUNDO DA CARTA
-// ============================================
-// Coloca o teu ficheiro MP3 em: src/assets/sounds/musica-carta.mp3
-// E descomenta a linha abaixo:
 import letterMusic from '../assets/sounds/Domingues-FICA.mp3'
 
-// ============================================
-
-// ============================================
-// CARTA DE AMOR PARA A RITA
-// ============================================
 const LETTER_CONTENT = {
   title: "Para ti, minha pequenina",
   date: "Malásia - 3 de Fevereiro de 2026",
@@ -44,7 +33,6 @@ const LETTER_CONTENT = {
   signature: "Com todo o amor que tenho (e é muito),",
   name: "O teu Pedro ❤️"
 }
-// ============================================
 
 export default function LoveLetter({ onReset }) {
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false)
@@ -53,7 +41,6 @@ export default function LoveLetter({ onReset }) {
   const letterRef = useRef(null)
   const musicRef = useRef(null)
 
-  // Inicializar música
   useEffect(() => {
     if (letterMusic) {
       musicRef.current = new Audio(letterMusic)
@@ -63,23 +50,29 @@ export default function LoveLetter({ onReset }) {
     return () => {
       if (musicRef.current) {
         musicRef.current.pause()
+        musicRef.current.currentTime = 0
+        musicRef.current = null
       }
     }
   }, [])
 
-  // Tocar música quando abre o envelope
+  const handleReset = () => {
+    if (musicRef.current) {
+      musicRef.current.pause()
+      musicRef.current.currentTime = 0
+    }
+    onReset()
+  }
+
   const handleOpenEnvelope = () => {
     setIsEnvelopeOpen(true)
     if (musicRef.current) {
       musicRef.current.play().then(() => {
         setIsMusicPlaying(true)
-      }).catch(() => {
-        // Autoplay bloqueado - utilizador pode clicar no botão de música
-      })
+      }).catch(() => {})
     }
   }
 
-  // Toggle música
   const toggleMusic = () => {
     if (!musicRef.current) return
     if (isMusicPlaying) {
@@ -132,12 +125,10 @@ export default function LoveLetter({ onReset }) {
     setIsDownloading(false)
   }
 
-  // Envelope fechado
   if (!isEnvelopeOpen) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-8">
         <div className="text-center animate-scale-in">
-          {/* Parabéns */}
           <div className="mb-6">
             <div className="text-6xl mb-4 animate-bounce-slow">🎉</div>
             <h1 className="text-3xl md:text-4xl font-display font-bold gradient-text mb-2">
@@ -148,15 +139,12 @@ export default function LoveLetter({ onReset }) {
             </p>
           </div>
 
-          {/* Envelope */}
           <div
             onClick={handleOpenEnvelope}
             className="relative cursor-pointer group mx-auto mb-6 hover:scale-105 transition-transform duration-300"
             style={{ width: '260px', height: '180px' }}
           >
-            {/* Envelope body */}
             <div className="absolute inset-0 bg-gradient-to-br from-rose-200 to-rose-300 rounded-xl shadow-2xl overflow-hidden">
-              {/* Flap */}
               <div
                 className="absolute top-0 left-0 right-0 bg-gradient-to-br from-rose-300 to-rose-400 origin-top group-hover:-rotate-12 transition-transform duration-500"
                 style={{
@@ -165,21 +153,18 @@ export default function LoveLetter({ onReset }) {
                 }}
               />
 
-              {/* Heart seal */}
               <div className="absolute top-1/4 left-1/2 -translate-x-1/2 z-10">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-malaysia-red to-malaysia-pink flex items-center justify-center shadow-lg animate-heart-beat">
                   <Heart className="w-7 h-7 text-white fill-white" />
                 </div>
               </div>
 
-              {/* Lines */}
               <div className="absolute bottom-6 left-6 right-6 space-y-2">
                 <div className="h-1 bg-white/40 rounded" />
                 <div className="h-1 bg-white/40 rounded w-2/3" />
               </div>
             </div>
 
-            {/* Sparkles */}
             <Sparkles className="absolute -top-3 -right-3 w-8 h-8 text-malaysia-gold animate-pulse" />
           </div>
 
@@ -191,14 +176,12 @@ export default function LoveLetter({ onReset }) {
     )
   }
 
-  // Carta aberta
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-xl mx-auto">
-        {/* Botões */}
         <div className="flex items-center justify-between mb-4 px-2">
           <button
-            onClick={onReset}
+            onClick={handleReset}
             className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-sm"
           >
             <RefreshCw className="w-4 h-4" />
@@ -206,7 +189,6 @@ export default function LoveLetter({ onReset }) {
           </button>
 
           <div className="flex items-center gap-2">
-            {/* Botão de música (só aparece se tiver música configurada) */}
             {letterMusic && (
               <button
                 onClick={toggleMusic}
@@ -240,12 +222,10 @@ export default function LoveLetter({ onReset }) {
           </div>
         </div>
 
-        {/* Carta */}
         <div
           ref={letterRef}
           className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden animate-scale-in"
         >
-          {/* Pattern de corações de fundo */}
           <div className="absolute inset-0 opacity-5">
             {[...Array(20)].map((_, i) => (
               <Heart
@@ -261,26 +241,22 @@ export default function LoveLetter({ onReset }) {
             ))}
           </div>
 
-          {/* Decoração superior */}
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="h-px bg-gradient-to-r from-transparent via-malaysia-gold to-transparent flex-1" />
             <Heart className="w-5 h-5 text-malaysia-red fill-malaysia-red" />
             <div className="h-px bg-gradient-to-r from-transparent via-malaysia-gold to-transparent flex-1" />
           </div>
 
-          {/* Data */}
           {LETTER_CONTENT.date && (
             <p className="text-right text-sm text-gray-500 italic mb-4">
               {LETTER_CONTENT.date}
             </p>
           )}
 
-          {/* Título */}
           <h2 className="text-2xl md:text-3xl font-display font-bold text-malaysia-darkRed mb-6 text-center">
             {LETTER_CONTENT.title}
           </h2>
 
-          {/* Conteúdo */}
           <div className="space-y-4 text-gray-700 leading-relaxed relative z-10">
             {LETTER_CONTENT.paragraphs.map((p, i) => (
               <p key={i} className="text-sm md:text-base">
@@ -289,7 +265,6 @@ export default function LoveLetter({ onReset }) {
             ))}
           </div>
 
-          {/* Assinatura */}
           <div className="mt-8 text-right relative z-10">
             <p className="text-gray-600 italic text-sm">{LETTER_CONTENT.signature}</p>
             <p className="text-xl font-display font-bold text-malaysia-red mt-1">
@@ -297,7 +272,6 @@ export default function LoveLetter({ onReset }) {
             </p>
           </div>
 
-          {/* Decoração inferior */}
           <div className="flex items-center justify-center gap-2 mt-6">
             <div className="h-px bg-gradient-to-r from-transparent via-malaysia-gold to-transparent flex-1" />
             <div className="flex gap-1">
@@ -309,7 +283,6 @@ export default function LoveLetter({ onReset }) {
           </div>
         </div>
 
-        {/* Mensagem final */}
         <div className="text-center mt-6 p-4 glass rounded-xl">
           <p className="text-gray-600 text-sm">
             Espero que tenhas gostado! 💕

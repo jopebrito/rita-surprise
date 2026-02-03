@@ -1,32 +1,30 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Heart, Star, RefreshCw, Sparkles, Gift, Infinity, Trophy, ArrowLeft, Volume2, VolumeX } from 'lucide-react'
+import { Heart, Star, RefreshCw, Gift, Infinity, Trophy, ArrowLeft, Volume2, VolumeX } from 'lucide-react'
 import { useSounds } from '../hooks/useSounds'
-
-// ============================================
-// FOTO DA RITA
-// ============================================
 import ritaPhoto from '../assets/rita-japan.jpg'
-// ============================================
 
-// Configurações BASE (fácil no início)
 const BASE_GRAVITY = 0.3
 const BASE_JUMP_FORCE = -7.5
 const BASE_PIPE_SPEED = 1.8
 const BASE_PIPE_GAP = 240
 const PIPE_WIDTH = 55
 const PLAYER_SIZE = 55
-const STORY_TARGET = 10  // Pontos para desbloquear carta
+const STORY_TARGET = 10
 
-// Configurações de DIFICULDADE MÁXIMA
 const MAX_GRAVITY = 0.45
 const MAX_PIPE_SPEED = 3.2
 const MIN_PIPE_GAP = 160
 
 const DIFFICULTY_INCREASE_EVERY = 2
 
-// ============================================
-// MENSAGENS
-// ============================================
+const getAttemptsBonus = (attempts) => {
+  if (attempts <= 1) return { extraLives: 0, gapBonus: 0, speedReduction: 0 }
+  if (attempts <= 3) return { extraLives: 1, gapBonus: 20, speedReduction: 0.1 }
+  if (attempts <= 5) return { extraLives: 1, gapBonus: 30, speedReduction: 0.15 }
+  if (attempts <= 8) return { extraLives: 2, gapBonus: 40, speedReduction: 0.2 }
+  return { extraLives: 2, gapBonus: 50, speedReduction: 0.25 }
+}
+
 const DEATH_MESSAGES = [
   "Eu apanho-te sempre que caíres 💕",
   "O amor também tem turbulência! ✈️💕",
@@ -63,8 +61,8 @@ const WIN_MESSAGES = {
 }
 
 export default function FlappyRita({ onComplete }) {
-  const [screen, setScreen] = useState('menu') // menu, intro, playing, dead, won
-  const [gameMode, setGameMode] = useState(null) // 'story' ou 'infinite'
+  const [screen, setScreen] = useState('menu')
+  const [gameMode, setGameMode] = useState(null)
   const [playerY, setPlayerY] = useState(250)
   const [velocity, setVelocity] = useState(0)
   const [pipes, setPipes] = useState([])
@@ -85,10 +83,8 @@ export default function FlappyRita({ onComplete }) {
   const velocityRef = useRef(velocity)
   const scoreRef = useRef(score)
 
-  // Sistema de sons
-  const { playSound, isMuted, toggleMute } = useSounds()
+  const { playSound, stopAllSounds, isMuted, toggleMute } = useSounds()
 
-  // Carregar dados
   useEffect(() => {
     const storyHS = localStorage.getItem('flappy-rita-story-hs')
     const infiniteHS = localStorage.getItem('flappy-rita-infinite-hs')
@@ -100,20 +96,21 @@ export default function FlappyRita({ onComplete }) {
 
   const getCurrentDifficulty = useCallback((currentScore) => {
     const level = Math.floor(currentScore / DIFFICULTY_INCREASE_EVERY)
-    const maxLevel = gameMode === 'infinite' ? 8 : 4 // Infinito fica mais difícil
+    const maxLevel = gameMode === 'infinite' ? 8 : 4
     return Math.min(level, maxLevel)
   }, [gameMode])
 
   const getGameSettings = useCallback((diffLevel) => {
     const maxLevel = gameMode === 'infinite' ? 8 : 4
     const progress = diffLevel / maxLevel
+    const bonus = getAttemptsBonus(attempts)
 
     return {
       gravity: BASE_GRAVITY + (MAX_GRAVITY - BASE_GRAVITY) * progress,
-      pipeSpeed: BASE_PIPE_SPEED + (MAX_PIPE_SPEED - BASE_PIPE_SPEED) * progress,
-      pipeGap: BASE_PIPE_GAP - (BASE_PIPE_GAP - MIN_PIPE_GAP) * progress,
+      pipeSpeed: Math.max(1.2, BASE_PIPE_SPEED + (MAX_PIPE_SPEED - BASE_PIPE_SPEED) * progress - bonus.speedReduction),
+      pipeGap: BASE_PIPE_GAP - (BASE_PIPE_GAP - MIN_PIPE_GAP) * progress + bonus.gapBonus,
     }
-  }, [gameMode])
+  }, [gameMode, attempts])
 
   useEffect(() => { playerYRef.current = playerY }, [playerY])
   useEffect(() => { velocityRef.current = velocity }, [velocity])
@@ -124,7 +121,7 @@ export default function FlappyRita({ onComplete }) {
 
   const handleDeath = useCallback(() => {
     if (lives > 0) {
-      playSound('hit') // Som de perder vida
+      playSound('hit')
       setLives(l => l - 1)
       setPlayerY(250)
       playerYRef.current = 250
@@ -134,14 +131,14 @@ export default function FlappyRita({ onComplete }) {
       return false
     }
 
-    playSound('gameOver') // Som de game over
+    stopAllSounds()
+    playSound('gameOver')
     const messages = gameMode === 'infinite' ? DEATH_MESSAGES_INFINITE : DEATH_MESSAGES
     setScreen('dead')
     setDeathMessage(messages[Math.floor(Math.random() * messages.length)])
     setAttempts(a => a + 1)
     clearInterval(gameLoopRef.current)
 
-    // Atualizar high scores
     if (gameMode === 'story' && score > highScoreStory) {
       setHighScoreStory(score)
       localStorage.setItem('flappy-rita-story-hs', score.toString())
@@ -152,9 +149,8 @@ export default function FlappyRita({ onComplete }) {
     }
 
     return true
-  }, [lives, gameMode, score, highScoreStory, highScoreInfinite, playSound])
+  }, [lives, gameMode, score, highScoreStory, highScoreInfinite, playSound, stopAllSounds])
 
-  // Game loop
   useEffect(() => {
     if (screen !== 'playing') return
 
@@ -221,19 +217,18 @@ export default function FlappyRita({ onComplete }) {
         }
 
         if (collectedHeart) {
-          playSound('heart') // Som de apanhar coração
+          playSound('heart')
           setLives(l => l + 1)
           setShowHeartCollect(true)
           setTimeout(() => setShowHeartCollect(false), 500)
         }
 
         if (scored) {
-          playSound('score') // Som de pontuação
+          playSound('score')
           setScore(s => {
             const newScore = s + 1
-            // Só verifica vitória no modo história
             if (gameMode === 'story' && newScore >= STORY_TARGET) {
-              playSound('win') // Som de vitória
+              playSound('win')
               setScreen('won')
               setLetterUnlocked(true)
               localStorage.setItem('flappy-rita-letter-unlocked', 'true')
@@ -251,7 +246,6 @@ export default function FlappyRita({ onComplete }) {
     return () => clearInterval(gameLoopRef.current)
   }, [screen, handleDeath, getCurrentDifficulty, getGameSettings, gameMode, playSound])
 
-  // Spawn pipes
   useEffect(() => {
     if (screen !== 'playing') return
 
@@ -263,7 +257,6 @@ export default function FlappyRita({ onComplete }) {
       const centerY = 200
       const gapY = centerY - variance/2 + Math.random() * variance
 
-      // Mais corações no modo infinito
       const heartChance = gameMode === 'infinite' ? 0.3 : 0.25
       const hasHeart = Math.random() < heartChance
 
@@ -312,6 +305,7 @@ export default function FlappyRita({ onComplete }) {
   }
 
   const beginPlaying = () => {
+    const bonus = getAttemptsBonus(attempts)
     setScreen('playing')
     setPlayerY(250)
     playerYRef.current = 250
@@ -320,7 +314,7 @@ export default function FlappyRita({ onComplete }) {
     setPipes([])
     setScore(0)
     scoreRef.current = 0
-    setLives(0)
+    setLives(bonus.extraLives)
     setDifficulty(0)
     pipeIdRef.current = 0
   }
@@ -340,12 +334,10 @@ export default function FlappyRita({ onComplete }) {
     </div>
   )
 
-  // ==================== MENU ====================
   if (screen === 'menu') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-8">
         <div className="card max-w-md w-full text-center animate-scale-in">
-          {/* Avatar */}
           <div className="relative mb-4 inline-block">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-malaysia-gold shadow-xl mx-auto animate-float bg-gradient-to-br from-malaysia-red to-malaysia-pink flex items-center justify-center">
               {ritaPhoto && !imageError ? (
@@ -362,7 +354,6 @@ export default function FlappyRita({ onComplete }) {
           </h2>
           <p className="text-gray-500 mb-6">Escolhe o teu modo de jogo!</p>
 
-          {/* Modo História */}
           <button
             onClick={() => startGame('story')}
             className="w-full mb-3 p-4 rounded-2xl bg-gradient-to-r from-malaysia-red to-malaysia-pink text-white shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -383,7 +374,6 @@ export default function FlappyRita({ onComplete }) {
             )}
           </button>
 
-          {/* Modo Infinito */}
           <button
             onClick={() => startGame('infinite')}
             className="w-full p-4 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -404,7 +394,6 @@ export default function FlappyRita({ onComplete }) {
             )}
           </button>
 
-          {/* Botão para ver carta se já desbloqueou */}
           {letterUnlocked && (
             <button
               onClick={onComplete}
@@ -418,7 +407,6 @@ export default function FlappyRita({ onComplete }) {
     )
   }
 
-  // ==================== INTRO ====================
   if (screen === 'intro') {
     const isStory = gameMode === 'story'
 
@@ -470,7 +458,6 @@ export default function FlappyRita({ onComplete }) {
     )
   }
 
-  // ==================== WON (só modo história) ====================
   if (screen === 'won') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-8">
@@ -514,7 +501,6 @@ export default function FlappyRita({ onComplete }) {
     )
   }
 
-  // ==================== DEAD ====================
   if (screen === 'dead') {
     const isStory = gameMode === 'story'
     const currentHS = isStory ? highScoreStory : highScoreInfinite
@@ -569,13 +555,11 @@ export default function FlappyRita({ onComplete }) {
     )
   }
 
-  // ==================== PLAYING ====================
   const settings = getGameSettings(difficulty)
   const isStory = gameMode === 'story'
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-4">
-      {/* HUD */}
       <div className="mb-3 flex items-center gap-3">
         <div className={`glass rounded-full px-4 py-2 flex items-center gap-2 ${!isStory && 'bg-purple-100/50'}`}>
           <Star className={`w-4 h-4 ${isStory ? 'text-malaysia-gold' : 'text-purple-500'} fill-current`} />
@@ -596,7 +580,6 @@ export default function FlappyRita({ onComplete }) {
           {"🔥".repeat(Math.min(difficulty + 1, 5))}
         </div>
 
-        {/* Botão de som */}
         <button
           onClick={(e) => { e.stopPropagation(); toggleMute(); }}
           className="glass rounded-full p-2 hover:bg-white/50 transition-colors"
@@ -610,27 +593,22 @@ export default function FlappyRita({ onComplete }) {
         </button>
       </div>
 
-      {/* Game area */}
       <div
         className={`relative rounded-3xl overflow-hidden shadow-2xl cursor-pointer select-none ${isStory ? 'bg-gradient-to-b from-sky-300 via-sky-200 to-green-200' : 'bg-gradient-to-b from-purple-300 via-indigo-200 to-blue-200'}`}
         style={{ width: '100%', maxWidth: '400px', height: '500px' }}
         onClick={handleJump}
         onTouchStart={(e) => { e.preventDefault(); handleJump(); }}
       >
-        {/* Clouds */}
         <div className="absolute top-10 left-10 w-16 h-8 bg-white/70 rounded-full" />
         <div className="absolute top-20 right-16 w-20 h-10 bg-white/60 rounded-full" />
         <div className="absolute top-32 left-1/3 w-12 h-6 bg-white/50 rounded-full" />
 
-        {/* Sun/Moon */}
         <div className={`absolute top-8 right-8 w-12 h-12 rounded-full ${isStory ? 'bg-yellow-300' : 'bg-purple-200'}`} style={{ boxShadow: `0 0 30px ${isStory ? 'rgba(255, 200, 0, 0.5)' : 'rgba(167, 139, 250, 0.5)'}` }} />
 
-        {/* Ground */}
         <div className={`absolute bottom-0 left-0 right-0 h-12 ${isStory ? 'bg-gradient-to-t from-green-600 to-green-500' : 'bg-gradient-to-t from-indigo-600 to-indigo-500'}`}>
           <div className={`absolute top-0 left-0 right-0 h-2 ${isStory ? 'bg-green-700' : 'bg-indigo-700'}`} />
         </div>
 
-        {/* Pipes */}
         {pipes.map(pipe => (
           <div key={pipe.id}>
             <div
@@ -660,7 +638,6 @@ export default function FlappyRita({ onComplete }) {
           </div>
         ))}
 
-        {/* Player */}
         <div
           className="absolute"
           style={{
