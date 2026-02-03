@@ -1,0 +1,265 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(220, 20, 60, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #DC143C, #FF69B4);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #8B0000, #DC143C);
+}
+
+/* Hibiscus flower decoration */
+.hibiscus {
+  background: radial-gradient(circle, #DC143C 0%, #8B0000 50%, transparent 70%);
+  position: relative;
+}
+
+.hibiscus::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, #FFD700 0%, transparent 30%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Batik pattern overlay */
+.batik-pattern {
+  background-image:
+    linear-gradient(45deg, rgba(255, 215, 0, 0.03) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 215, 0, 0.03) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 215, 0, 0.03) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 215, 0, 0.03) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #FFD700, #DC143C, #FF69B4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Shimmer effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-8 py-4 rounded-full font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95;
+  background: linear-gradient(135deg, #DC143C, #FF69B4);
+  box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 25px rgba(220, 20, 60, 0.6);
+}
+
+.btn-gold {
+  @apply px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #8B0000;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.btn-gold:hover {
+  box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6);
+}
+
+/* Card styles */
+.card {
+  @apply rounded-3xl p-6 transition-all duration-300;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 40px rgba(220, 20, 60, 0.15);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(220, 20, 60, 0.25);
+}
+
+/* Progress bar */
+.progress-bar {
+  background: linear-gradient(90deg, #DC143C, #FFD700, #FF69B4);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Floating animation for decorations */
+@keyframes float-random {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10px, -10px) rotate(5deg); }
+  50% { transform: translate(-5px, 5px) rotate(-5deg); }
+  75% { transform: translate(-10px, -5px) rotate(3deg); }
+}
+
+.float-decoration {
+  animation: float-random 6s ease-in-out infinite;
+}
+
+/* Rhythm game lane glow */
+.lane-glow {
+  box-shadow: inset 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+/* Heart catching game */
+.game-character {
+  transition: left 0.1s ease-out;
+}
+
+/* Quiz animations */
+.quiz-option {
+  @apply transition-all duration-300;
+}
+
+.quiz-option:hover {
+  transform: translateX(10px);
+}
+
+.quiz-correct {
+  @apply bg-green-100 border-green-500;
+  animation: pulse 0.5s ease-in-out;
+}
+
+.quiz-incorrect {
+  @apply bg-red-100 border-red-500;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* Love letter styles */
+.love-letter {
+  background: linear-gradient(135deg, #FFF8DC 0%, #FFEFD5 100%);
+  box-shadow:
+    0 0 0 1px rgba(139, 0, 0, 0.1),
+    0 20px 60px rgba(139, 0, 0, 0.2),
+    inset 0 0 100px rgba(255, 215, 0, 0.1);
+}
+
+.love-letter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 10 C60 0, 80 0, 90 20 C100 40, 80 70, 50 90 C20 70, 0 40, 10 20 C20 0, 40 0, 50 10' fill='%23DC143C' fill-opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+
+/* Confetti */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  opacity: 0;
+  animation: confetti-fall 3s ease-in-out forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(-100vh) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .btn-primary, .btn-gold {
+    @apply px-6 py-3 text-sm;
+  }
+
+  .card {
+    @apply p-4;
+  }
+}
+
+/* Petronas Towers silhouette */
+.petronas-tower {
+  clip-path: polygon(
+    45% 0%, 55% 0%,
+    55% 10%, 60% 10%,
+    60% 20%, 55% 20%,
+    55% 30%, 60% 30%,
+    60% 40%, 55% 40%,
+    55% 50%, 60% 50%,
+    60% 60%, 55% 60%,
+    55% 70%, 65% 70%,
+    65% 80%, 70% 80%,
+    70% 100%, 30% 100%,
+    30% 80%, 35% 80%,
+    35% 70%, 45% 70%,
+    45% 60%, 40% 60%,
+    40% 50%, 45% 50%,
+    45% 40%, 40% 40%,
+    40% 30%, 45% 30%,
+    45% 20%, 40% 20%,
+    40% 10%, 45% 10%
+  );
+}
