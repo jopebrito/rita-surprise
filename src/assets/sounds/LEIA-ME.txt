@@ -1,0 +1,61 @@
+============================================
+COMO ADICIONAR SONS AO JOGO FLAPPY RITA
+============================================
+
+O jogo já está preparado para usar sons! Por defeito, usa sons gratuitos da internet.
+Se quiseres personalizar com os teus próprios sons, segue estes passos:
+
+
+SONS DO JOGO (já funcionam com sons online)
+-------------------------------------------
+Os seguintes sons já estão a funcionar:
+- Salto (quando a Rita pula)
+- Pontuação (quando passa pelos tubos)
+- Coração (quando apanha vida extra)
+- Colisão (quando bate nos tubos)
+- Game Over (quando perde todas as vidas)
+- Vitória (quando ganha no modo história)
+
+Para usar os teus próprios sons, edita o ficheiro:
+  src/hooks/useSounds.js
+
+E substitui os URLs em SOUND_URLS pelos teus ficheiros locais.
+
+
+MÚSICA DA CARTA DE AMOR
+-----------------------
+Para adicionar música quando a carta abre:
+
+1. Coloca o teu ficheiro MP3 nesta pasta com o nome:
+   musica-carta.mp3
+
+2. Edita o ficheiro: src/components/LoveLetter.jsx
+
+3. Procura esta linha (perto do início do ficheiro):
+   // import letterMusic from '../assets/sounds/musica-carta.mp3'
+   const letterMusic = null
+
+4. Remove o "//" do início e apaga a linha "const letterMusic = null":
+   import letterMusic from '../assets/sounds/musica-carta.mp3'
+
+5. Guarda e a música vai tocar automaticamente quando abrir o envelope!
+
+
+FORMATOS SUPORTADOS
+-------------------
+- MP3 (recomendado)
+- WAV
+- OGG
+
+
+DICAS
+-----
+- Usa ficheiros pequenos (menos de 1MB) para carregar mais rápido
+- A música da carta faz loop automático
+- Podes ajustar o volume no código (procura por "volume:")
+- O botão de mute no jogo guarda a preferência do utilizador
+
+
+============================================
+Feito com amor para a Rita! 💕
+============================================

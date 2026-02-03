@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Heart, Star, RefreshCw, Sparkles, Gift, Infinity, Trophy, ArrowLeft } from 'lucide-react'
+import { Heart, Star, RefreshCw, Sparkles, Gift, Infinity, Trophy, ArrowLeft, Volume2, VolumeX } from 'lucide-react'
+import { useSounds } from '../hooks/useSounds'
 
 // ============================================
 // FOTO DA RITA
@@ -84,6 +85,9 @@ export default function FlappyRita({ onComplete }) {
   const velocityRef = useRef(velocity)
   const scoreRef = useRef(score)
 
+  // Sistema de sons
+  const { playSound, isMuted, toggleMute } = useSounds()
+
   // Carregar dados
   useEffect(() => {
     const storyHS = localStorage.getItem('flappy-rita-story-hs')
@@ -120,6 +124,7 @@ export default function FlappyRita({ onComplete }) {
 
   const handleDeath = useCallback(() => {
     if (lives > 0) {
+      playSound('hit') // Som de perder vida
       setLives(l => l - 1)
       setPlayerY(250)
       playerYRef.current = 250
@@ -129,6 +134,7 @@ export default function FlappyRita({ onComplete }) {
       return false
     }
 
+    playSound('gameOver') // Som de game over
     const messages = gameMode === 'infinite' ? DEATH_MESSAGES_INFINITE : DEATH_MESSAGES
     setScreen('dead')
     setDeathMessage(messages[Math.floor(Math.random() * messages.length)])
@@ -146,7 +152,7 @@ export default function FlappyRita({ onComplete }) {
     }
 
     return true
-  }, [lives, gameMode, score, highScoreStory, highScoreInfinite])
+  }, [lives, gameMode, score, highScoreStory, highScoreInfinite, playSound])
 
   // Game loop
   useEffect(() => {
@@ -215,16 +221,19 @@ export default function FlappyRita({ onComplete }) {
         }
 
         if (collectedHeart) {
+          playSound('heart') // Som de apanhar coração
           setLives(l => l + 1)
           setShowHeartCollect(true)
           setTimeout(() => setShowHeartCollect(false), 500)
         }
 
         if (scored) {
+          playSound('score') // Som de pontuação
           setScore(s => {
             const newScore = s + 1
             // Só verifica vitória no modo história
             if (gameMode === 'story' && newScore >= STORY_TARGET) {
+              playSound('win') // Som de vitória
               setScreen('won')
               setLetterUnlocked(true)
               localStorage.setItem('flappy-rita-letter-unlocked', 'true')
@@ -240,7 +249,7 @@ export default function FlappyRita({ onComplete }) {
 
     gameLoopRef.current = setInterval(gameLoop, 20)
     return () => clearInterval(gameLoopRef.current)
-  }, [screen, handleDeath, getCurrentDifficulty, getGameSettings, gameMode])
+  }, [screen, handleDeath, getCurrentDifficulty, getGameSettings, gameMode, playSound])
 
   // Spawn pipes
   useEffect(() => {
@@ -280,10 +289,11 @@ export default function FlappyRita({ onComplete }) {
 
   const handleJump = useCallback(() => {
     if (screen === 'playing') {
+      playSound('jump')
       setVelocity(BASE_JUMP_FORCE)
       velocityRef.current = BASE_JUMP_FORCE
     }
-  }, [screen])
+  }, [screen, playSound])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -585,6 +595,19 @@ export default function FlappyRita({ onComplete }) {
         <div className="glass rounded-full px-3 py-2 text-xs">
           {"🔥".repeat(Math.min(difficulty + 1, 5))}
         </div>
+
+        {/* Botão de som */}
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+          className="glass rounded-full p-2 hover:bg-white/50 transition-colors"
+          title={isMuted ? 'Ativar som' : 'Desativar som'}
+        >
+          {isMuted ? (
+            <VolumeX className="w-4 h-4 text-gray-500" />
+          ) : (
+            <Volume2 className="w-4 h-4 text-gray-600" />
+          )}
+        </button>
       </div>
 
       {/* Game area */}

@@ -1,7 +1,16 @@
-import { useState, useRef } from 'react'
-import { Heart, Download, RefreshCw, Sparkles } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Heart, Download, RefreshCw, Sparkles, Music, Music2 } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
+
+// ============================================
+// MÚSICA DE FUNDO DA CARTA
+// ============================================
+// Coloca o teu ficheiro MP3 em: src/assets/sounds/musica-carta.mp3
+// E descomenta a linha abaixo:
+import letterMusic from '../assets/sounds/Domingues-FICA.mp3'
+
+// ============================================
 
 // ============================================
 // CARTA DE AMOR PARA A RITA
@@ -40,7 +49,48 @@ const LETTER_CONTENT = {
 export default function LoveLetter({ onReset }) {
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false)
   const letterRef = useRef(null)
+  const musicRef = useRef(null)
+
+  // Inicializar música
+  useEffect(() => {
+    if (letterMusic) {
+      musicRef.current = new Audio(letterMusic)
+      musicRef.current.loop = true
+      musicRef.current.volume = 0.4
+    }
+    return () => {
+      if (musicRef.current) {
+        musicRef.current.pause()
+      }
+    }
+  }, [])
+
+  // Tocar música quando abre o envelope
+  const handleOpenEnvelope = () => {
+    setIsEnvelopeOpen(true)
+    if (musicRef.current) {
+      musicRef.current.play().then(() => {
+        setIsMusicPlaying(true)
+      }).catch(() => {
+        // Autoplay bloqueado - utilizador pode clicar no botão de música
+      })
+    }
+  }
+
+  // Toggle música
+  const toggleMusic = () => {
+    if (!musicRef.current) return
+    if (isMusicPlaying) {
+      musicRef.current.pause()
+      setIsMusicPlaying(false)
+    } else {
+      musicRef.current.play().then(() => {
+        setIsMusicPlaying(true)
+      }).catch(() => {})
+    }
+  }
 
   const handleDownloadPDF = async () => {
     if (!letterRef.current) return
@@ -100,7 +150,7 @@ export default function LoveLetter({ onReset }) {
 
           {/* Envelope */}
           <div
-            onClick={() => setIsEnvelopeOpen(true)}
+            onClick={handleOpenEnvelope}
             className="relative cursor-pointer group mx-auto mb-6 hover:scale-105 transition-transform duration-300"
             style={{ width: '260px', height: '180px' }}
           >
@@ -155,18 +205,39 @@ export default function LoveLetter({ onReset }) {
             Recomeçar
           </button>
 
-          <button
-            onClick={handleDownloadPDF}
-            disabled={isDownloading}
-            className="btn-gold !py-2 !px-4 text-sm flex items-center gap-2"
-          >
-            {isDownloading ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4" />
+          <div className="flex items-center gap-2">
+            {/* Botão de música (só aparece se tiver música configurada) */}
+            {letterMusic && (
+              <button
+                onClick={toggleMusic}
+                className={`p-2 rounded-full transition-all ${
+                  isMusicPlaying
+                    ? 'bg-malaysia-pink text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+                title={isMusicPlaying ? 'Pausar música' : 'Tocar música'}
+              >
+                {isMusicPlaying ? (
+                  <Music2 className="w-4 h-4 animate-pulse" />
+                ) : (
+                  <Music className="w-4 h-4" />
+                )}
+              </button>
             )}
-            {isDownloading ? 'A gerar...' : 'Guardar PDF'}
-          </button>
+
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="btn-gold !py-2 !px-4 text-sm flex items-center gap-2"
+            >
+              {isDownloading ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              {isDownloading ? 'A gerar...' : 'Guardar PDF'}
+            </button>
+          </div>
         </div>
 
         {/* Carta */}
